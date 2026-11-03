@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ps" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171329">
+<title>LUNA AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#171329,#282044);color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:560px;min-height:100vh;display:flex;flex-direction:column;padding:18px}
+header{text-align:center;padding:18px 8px 12px}
+.avatar{width:86px;height:86px;border-radius:50%;margin:auto;background:linear-gradient(135deg,#f6b6dc,#9e8cff);display:grid;place-items:center;font-size:42px;box-shadow:0 0 28px #c58de866}
+h1{margin:10px 0 4px;letter-spacing:2px}#status{color:#c8bddf;font-size:13px}
+#chat{flex:1;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:12px}
+.msg{padding:12px 15px;border-radius:17px;max-width:88%;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.bot{align-self:flex-start;background:#352d50;border:1px solid #51456f}
+.user{align-self:flex-end;background:#7658b8}
+.controls{display:flex;gap:8px;padding:10px 0}
+input{flex:1;min-width:0;border:1px solid #62567c;border-radius:14px;background:#211b35;color:white;padding:14px;font-size:16px;outline:none}
+button{border:0;border-radius:14px;padding:0 17px;background:#b987e9;color:#21152e;font-weight:bold;font-size:15px}
+button:disabled{opacity:.55}
+.note{text-align:center;color:#b9aecb;font-size:11px;padding:4px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="avatar">🌙</div>
+  <h1>LUNA AI</h1>
+  <div id="status">لونا چمتو ده 🌸</div>
+</header>
+<main id="chat">
+  <div class="msg bot">سلام! زه لونا یم. څه مرسته درسره وکړم؟ 🌸</div>
+</main>
+<div class="controls">
+  <input id="input" type="text" placeholder="خپل پیغام ولیکه..." autocomplete="off">
+  <button id="send">ولېږه</button>
+</div>
+<div class="note">خپل Gemini API Key له هیچا سره مه شریکوه.</div>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwHknBzEXjSerpMw5xXtdkGYusgiKRBlDCJ1xXRFHs6BWQ8x6r5QanG2FreDhY3hnaBBA/exec";
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const statusEl = document.getElementById("status");
+
+function addMessage(text, who) {
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ps-PK";
+  utterance.rate = 0.95;
+  window.speechSynthesis.speak(utterance);
+}
+async function sendMessage() {
+  const message = input.value.trim();
+  if (!message || sendBtn.disabled) return;
+  addMessage(message, "user");
+  input.value = "";
+  sendBtn.disabled = true;
+  statusEl.textContent = "لونا فکر کوي... ⏳";
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({message})
+    });
+    if (!response.ok) throw new Error("د سرور ستونزه: " + response.status);
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    const answer = data.answer || "بښنه غواړم، ځواب ترلاسه نه شو.";
+    addMessage(answer, "bot");
+    speak(answer);
+    statusEl.textContent = "لونا چمتو ده 🌸";
+  } catch (err) {
+    addMessage("بښنه غواړم، له AI سره اتصال کې ستونزه راغله. انټرنېټ وګوره او بیا هڅه وکړه.\nتخنیکي ستونزه: " + err.message, "bot");
+    statusEl.textContent = "د اتصال ستونزه";
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+sendBtn.addEventListener("click", sendMessage);
+input.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+</script>
+</body>
+</html>
