@@ -23,7 +23,13 @@ button:disabled{opacity:.55}
 #mic.listening{background:#ff8b9c;color:#301522}
 .note{text-align:center;color:#b9aecb;font-size:11px;padding:4px}
 </style>
-</head>
+</head><script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
 <body>
 <div class="app">
 <header>
