@@ -1,0 +1,16 @@
+{
+  "name": "LUNA AI",
+  "short_name": "LUNA",
+  "description": "LUNA AI Personal Assistant",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#171329",
+  "theme_color": "#171329",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
